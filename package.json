@@ -31,21 +31,25 @@
     "readme": "bin/gogs-migrate --help | help2md-in-place README.md"
   },
   "dependencies": {
-    "babel-runtime": "^4.6.6",
+    "@babel/polyfill": "^7.0.0",
     "chalk": "^1.0.0",
     "docopt": "^0.4.1",
     "es6-denodeify": "^0.1.1",
+    "esm": "^3.0.84",
     "highland": "^2.4.0",
     "js-yaml": "^3.2.7",
     "lodash.zipobject": "^3.0.0",
     "parse-link-header": "^0.2.0",
     "read": "^1.0.5",
     "request": "^2.53.0",
-    "yaml-update": "valeriangalliat/yaml-update"
+    "yaml-update": "github:valeriangalliat/yaml-update"
   },
   "devDependencies": {
-    "babel": "^4.6.6",
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
+    "babel-plugin-add-module-exports": "^1.0.0",
     "help2md": "^1.0.0",
-    "standard": "^4.0.1"
+    "standard": "^12.0.1"
   }
 }

@@ -35,13 +35,13 @@ export default opts => repo => {
       {}
     )
   })
-    .doto(_.log)
     .doto(response => {
       if (response.statusCode === 500) return // 500 errors have a JSON message.
       if (response.statusCode === 200 || response.statusCode === 201) return // JSON response.
       throw err(repo, `Unexpected status ${response.statusCode} from ${opts.prefix}${migrate}`)
     })
-
+    .doto(response => _.log(`Done migrating ${repo.name} to ${response.body.html_url}`))
+  
     .map(response => Object.assign({ repo }, response.body))
 
     .doto(({ repo, message }) => {

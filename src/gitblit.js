@@ -75,7 +75,7 @@ export const repos = opts =>
             pass: opts['--gitblit-pass']
         }
     }))
-    .doto(repo => _.log('Found repo to migrate', repo))
+    .doto(repo => _.log('Found repo to migrate', repo.name, repo.url))
     // .doto(repo => {
     //     if (repo.name === repo.organization) _.log(err(repo, 'name and org are the same'))
     // })

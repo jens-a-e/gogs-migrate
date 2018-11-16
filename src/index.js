@@ -1,4 +1,4 @@
-// const _ = require('highland')
+const _ = require('highland')
 const { request } = require('./util')
 
 const err = (repo, message) =>
@@ -24,9 +24,9 @@ export default opts => repo => {
 
       repo.private && { private: true },
 
-      opts.auth && {
-        auth_username: opts.auth.user,
-        auth_password: opts.auth.pass
+      (repo.auth || opts.auth) && {
+        auth_username: repo.auth.pass || opts.auth.user,
+        auth_password: repo.auth.pass || opts.auth.pass
       },
 
       opts.mirror && { mirror: true },
@@ -35,6 +35,7 @@ export default opts => repo => {
       {}
     )
   })
+    .doto(_.log)
     .doto(response => {
       if (response.statusCode === 500) return // 500 errors have a JSON message.
       if (response.statusCode === 200 || response.statusCode === 201) return // JSON response.

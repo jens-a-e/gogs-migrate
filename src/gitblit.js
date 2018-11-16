@@ -2,7 +2,7 @@ const _ = require('highland')
 const { request: makeRequest } = require('./util')
 
 const err = (repo, message) =>
-    Object.assign(new Error(message), { repo })
+    Object.assign(new Error(message + ' ' + JSON.stringify(repo, null, '\t')), { repo })
 
 const request = base => opts => {
     return makeRequest(Object.assign({ json: true }, opts, base))
@@ -34,7 +34,7 @@ const requestGitblit = opts => request(
 
 const addOrganisation = repo => {
     let [name, _name] = repo.name.split('/')
-    name = (name || _name).replace('.git', '')
+    name = (_name || name).replace('.git', '')
     return _.extend({name, organization: repo.projectPath}, repo)
 }
 
@@ -52,9 +52,10 @@ const getOrgUIds = opts => repo => {
         })
         .flatMap(response => [response.body])
         .doto(org => orgsCache[repo.organization] = org.id)
-        // .doto(_.log)
-        .map(org => Object.assign({}, repo, { uid: org.id }))
-        // .collect()
+        .map(org => Object.assign({}, repo, {
+            // add the org id
+            uid: org.id,
+        }))
 }
 
 export const repos = opts =>
@@ -67,10 +68,16 @@ export const repos = opts =>
     .map(addOrganisation)
     .map(({ name, url, description, organization }) => ({ name, url, desc: description, organization }))
     .flatMap(getOrgUIds(opts))
-    // .pluck('uid').uniq()
-    .compact()
-    // .each(repo => {
-    //     _.log(repo)
+    .map(repo => Object.assign(repo, {
+        // add user credentials to clone private repos
+        auth: {
+            user: opts['--gitblit-user'],
+            pass: opts['--gitblit-pass']
+        }
+    }))
+    .doto(repo => _.log('Found repo to migrate', repo))
+    // .doto(repo => {
+    //     if (repo.name === repo.organization) _.log(err(repo, 'name and org are the same'))
     // })
-    .collect()
-    .each(result => _.log(result, result.length)) // terminate for debugging
+    // .each(_.log)
+    // .collect().each(result => _.log(result, result.length)) // terminate for debugging

@@ -12,6 +12,7 @@ const zipObject = require('lodash.zipobject')
 
 const migrate = require('./')
 const github = require('./github')
+const gitblit = require('./gitblit')
 
 const doc = `
 Usage:
@@ -27,6 +28,7 @@ Options:
   --github-prefix=<prefix>  GitHub API prefix (defaults to \`https://api.github.com\`).
   --github-user=<user>      GitHub username to stream repositories from.
   --github-token=<token>    GitHub user token to access private repositories.
+  --gitblit=<url>           Use GitBlit as source
   --mirror                  Create mirror repositories.
   --private                 Force private repositories (copy source visibility otherwise).
   --with-forks              Include forked repositories.
@@ -104,9 +106,10 @@ const repos = opts =>
       user: opts['--github-user'],
       token: opts['--github-token'] || undefined,
       prefix: opts['--github-prefix'] || undefined
-    })
+    }),
 
     // Add sources here? Bitbucket, stdin, etc.
+    opts['--gitblit'] && gitblit.repos(opts)
 
   ])
     .compact() // Remove falsy values.
@@ -114,7 +117,7 @@ const repos = opts =>
 
     // Apply filters.
     .filter(opts['--with-forks'] ? repo => true : repo => !repo.fork)
-    .filter(repo => !(repo.name in opts['--ignore']))
+    // .filter(repo => !(repo.name in opts['--ignore']))
 
 // UI for regular migration stream.
 const migrateStream = repoStream =>
@@ -165,6 +168,7 @@ const saveStream = (opts, repoStream) =>
 
 // From fulfilled options, get repositories and migrate.
 const main = opts => {
+  // return repos(opts)
   const repoStream = repos(opts)
     .flatMap(migrate({
       prefix: opts['--gogs-prefix'],

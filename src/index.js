@@ -1,3 +1,4 @@
+// const _ = require('highland')
 const { request } = require('./util')
 
 const err = (repo, message) =>
@@ -6,8 +7,8 @@ const err = (repo, message) =>
 const migrate = '/api/v1/repos/migrate'
 
 // Migrate repository to Gogs.
-export default opts => repo =>
-  request(`${opts.prefix}${migrate}`, {
+export default opts => repo => {
+  return request(`${opts.prefix}${migrate}`, {
     method: 'post',
     json: true,
     headers: {
@@ -15,7 +16,7 @@ export default opts => repo =>
     },
     form: Object.assign(
       {
-        uid: opts.uid,
+        uid: repo.uid || opts.uid,
         clone_addr: repo.url,
         repo_name: repo.name,
         desc: repo.desc
@@ -42,6 +43,7 @@ export default opts => repo =>
 
     .map(response => Object.assign({ repo }, response.body))
 
-    .doto(({ message }) => {
+    .doto(({ repo, message }) => {
       if (message) throw err(repo, message)
     })
+  }
